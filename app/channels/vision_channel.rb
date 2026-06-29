@@ -4,25 +4,24 @@ class VisionChannel < ApplicationCable::Channel
   end
 
   def receive(data)
-    Rails.logger.info "VisionChannel: Received frame of size #{data['image']&.length} bytes"
+    Rails.logger.warn '!!! VISION CHANNEL: RECEIVED PAYLOAD START !!!'
+    Rails.logger.info "VisionChannel: Received payload keys: #{data.keys.inspect}"
 
     return unless data['image'].present?
 
-    begin
-      result = VisionAnalysisService.call(data['image'])
+    # Send immediate acknowledgement to client
+    transmit({ status: 'acknowledged', message: 'Image received, analyzing...' })
 
-      transmit({
-        reasoning: result[:reasoning],
-        answer: result[:answer]
-      })
-    rescue StandardError => e
-      Rails.logger.error "Unable to process VisionChannel#received: #{e.message}"
-      Rails.logger.error e.backtrace.join("\n")
+    # The service now handles asynchronous broadcasting of results for each agent individually.
+    # We simply trigger the service; the responses will flow back via the 'vision_channel' stream.
+    VisionAnalysisService.call(data['image'])
 
-      transmit({
-        reasoning: '',
-        answer: "Critical Error: #{e.message}"
-      })
-    end
+    Rails.logger.warn '!!! VISION CHANNEL: RECEIVED PAYLOAD HANDLED !!!'
+  rescue StandardError => e
+    Rails.logger.error "Unable to process VisionChannel#receive: #{e.message}"
+    transmit({
+      status: 'error',
+      content: "Critical Error: #{e.message}"
+    })
   end
 end

@@ -1,116 +1,92 @@
 require 'rails_helper'
 
 RSpec.describe VisionAnalysisService do
-  let(:base64_image) { 'data:image/jpeg;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==' }
+  let(:base64_image) { 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggK7P6S5XwAAAABJRU5ErkJggg==' }
+  let(:experts_config) { YAML.load_file(Rails.root.join('config', 'expert_panel.yml'))['experts'] }
 
   describe '.call' do
-    let(:raw_base64) { 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==' }
-    let(:base64_with_prefix) { "data:image/jpeg;base64,#{raw_base64}" }
+    it 'triggers parallel calls for each expert and broadcasts results individually' do
+      allow(Cerebras::Client).to receive(:new).and_return(client_double)
+      allow(client_double).to receive(:chat).and_return(chat_double)
+      allow(chat_double).to receive(:completions).and_return(completions_double)
 
-    context 'when the SDK call is successful' do
-      let(:mock_message) do
-        double('Message',
-          reasoning: 'The image shows a small red dot.',
-          content: 'A small red dot.'
-        )
-      end
+      expect(completions_double).to receive(:create).exactly(experts_config.keys.size).times.and_return(mock_response)
 
-      let(:mock_choice) do
-        double('Choice', message: mock_message)
-      end
+      # We expect 4 distinct broadcasts. Use a simple counter or check for each agent_id.
+      expect(ActionCable.server).to receive(:broadcast).exactly(experts_config.keys.size).times.with(
+        'vision_channel',
+        hash_including(content: 'Final Answer', status: 'success')
+      )
 
-      # Simulate ResponseWrapper using object-style access
-      let(:mock_response_wrapper) do
-        double('ResponseWrapper', choices: [ mock_choice ])
-      end
-
-      let(:completions_double) { double('Completions', create: mock_response_wrapper) }
-      let(:chat_double) { double('Chat', completions: completions_double) }
-      let(:client_double) { double('Client', chat: chat_double) }
-
-      before do
-        allow(Cerebras::Client).to receive(:new).and_return(client_double)
-      end
-
-      it 'returns the correct reasoning when SDK returns ResponseWrapper' do
-        result = VisionAnalysisService.call(base64_with_prefix)
-        expect(result[:reasoning]).to eq('The image shows a small red dot.')
-      end
-
-      it 'returns the correct answer when SDK returns ResponseWrapper' do
-        result = VisionAnalysisService.call(base64_with_prefix)
-        expect(result[:answer]).to eq('A small red dot.')
-      end
-
-      it 'correctly handles raw base64 input by adding prefix' do
-        # Verify the SDK receives the prefixed version
-        expect(completions_double).to receive(:create).with(
-          hash_including(
-            messages: [
-              hash_including(
-                content: [
-                  { type: 'text', text: anything },
-                  { type: 'image_url', image_url: { url: base64_with_prefix } }
-                ]
-              )
-            ]
-          )
-        ).and_return(mock_response_wrapper)
-
-        VisionAnalysisService.call(raw_base64)
-      end
-
-      it 'does not double-prefix already prefixed images' do
-        expect(completions_double).to receive(:create).with(
-          hash_including(
-            messages: [
-              hash_including(
-                content: [
-                  { type: 'text', text: anything },
-                  { type: 'image_url', image_url: { url: base64_with_prefix } }
-                ]
-              )
-            ]
-          )
-        ).and_return(mock_response_wrapper)
-
-        VisionAnalysisService.call(base64_with_prefix)
-      end
-
-      it 'handles empty choices gracefully' do
-        empty_response = double('ResponseWrapper', choices: [])
-        allow(completions_double).to receive(:create).and_return(empty_response)
-
-        result = VisionAnalysisService.call(base64_with_prefix)
-        expect(result).to eq({ reasoning: '', answer: '' })
-      end
+      VisionAnalysisService.call(base64_image)
     end
 
-    context 'when the SDK call fails' do
-      context 'when the API key is missing' do
-        before do
-          allow(ENV).to receive(:[]).with('CEREBRAS_API_KEY').and_return(nil)
-          allow(Cerebras::Client).to receive(:new).and_raise(StandardError.new('API Key Error'))
-        end
+    it 'scrubs reasoning tokens from the broadcast content' do
+      allow(Cerebras::Client).to receive(:new).and_return(client_double)
+      allow(client_double).to receive_message_chain(:chat, :completions, :create).and_return(
+        mock_response_with_reasoning
+      )
 
-        let(:result) { VisionAnalysisService.call(base64_image) }
-
-        it 'returns an empty reasoning string on failure' do
-          expect(result[:reasoning]).to eq('')
-        end
-
-        it 'prefixes the answer with "Error:" on failure' do
-          expect(result[:answer]).to start_with('Error:')
-        end
-
-        it 'includes the correct error message in the answer' do
-          expect(result[:answer]).to eq('Error: CEREBRAS_API_KEY is not set')
-        end
+      # Verify that the content sent to broadcast does NOT contain the reasoning string
+      expect(ActionCable.server).to receive(:broadcast).exactly(experts_config.keys.size).times do |channel, payload|
+        expect(channel).to eq('vision_channel')
+        expect(payload[:content]).to eq('Final Answer')
+        expect(payload).not_to have_key(:reasoning)
       end
 
-      before do
-        allow(Cerebras::Client).to receive(:new).and_raise(StandardError.new('API Key Error'))
-      end
+      VisionAnalysisService.call(base64_image)
     end
+
+    it 'broadcasts an error for an agent if its call fails, without stopping others' do
+      allow(Cerebras::Client).to receive(:new).and_return(client_double)
+      allow(client_double).to receive(:chat).and_return(chat_double)
+      allow(chat_double).to receive(:completions).and_return(completions_double)
+
+      # Simulate one failure and others succeeding
+      call_count = 0
+      allow(completions_double).to receive(:create) do
+        call_count += 1
+        raise StandardError, 'SDK Timeout' if call_count == 1
+        mock_response
+      end
+
+      # Expect exactly one error broadcast
+      expect(ActionCable.server).to receive(:broadcast).with(
+        'vision_channel',
+        hash_including(status: 'error', content: /Error analyzing/)
+      ).once
+
+      # The other 3 should still succeed
+      expect(ActionCable.server).to receive(:broadcast).with(
+        'vision_channel',
+        hash_including(status: 'success')
+      ).exactly(experts_config.keys.size - 1).times
+
+      VisionAnalysisService.call(base64_image)
+    end
+  end
+
+  # Helpers for mocks
+  let(:client_double) { instance_double('Cerebras::Client') }
+  let(:chat_double) { double('chat') }
+  let(:completions_double) { double('completions') }
+
+  let(:mock_response) do
+    double('Response', choices: [
+      double('Choice', message: double('Message', content: 'Final Answer', reasoning: 'Some reasoning'))
+    ])
+  end
+
+  let(:mock_response_with_reasoning) do
+    double('Response', choices: [
+      double('Choice', message: double('Message', content: 'Final Answer', reasoning: 'This is a secret reasoning'))
+    ])
+  end
+end
+
+# Helper matcher for hash contents
+RSpec::Matchers.define :hash_including do |expected|
+  match do |actual|
+    expected.all? { |k, v| actual[k] == v || (v.is_a?(Regexp) && actual[k] =~ v) }
   end
 end

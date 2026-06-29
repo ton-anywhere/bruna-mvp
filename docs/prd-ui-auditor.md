@@ -18,10 +18,11 @@ The **UI Auditor** is a real-time design critique tool. Instead of a live camera
 2. **Single File Limit:** The system must handle exactly one image file per request for the MVP.
 3. **Client-Side Processing:** The browser must convert the uploaded image to a Base64 string before transmission.
 4. **WebSocket Transport:** The image must be sent to the server via ActionCable to maintain the "Live Vision" pipeline.
-5. **Categorized AI Analysis:** The system must prompt the LLM to return a response divided into three specific categories:
-    - **Accessibility:** (e.g., Contrast, font size, WCAG compliance).
-    - **Visual Hierarchy:** (e.g., Balance, focal points, alignment).
-    - **UX Friction:** (e.g., Confusing navigation, redundant steps, cognitive load).
+5. **Parallel Expert Panel:** The system must dispatch the image to four distinct, specialized AI personas in parallel. Each persona performs an "Independent/Blind Review," focusing exclusively on its domain without influence from the other agents.
+    - **Accessibility Lead:** Critiques based on WCAG, contrast, screen readers, and inclusive design.
+    - **Visual Architect:** Critiques hierarchy, spacing, alignment, color theory, and professional polish.
+    - **UX Psychologist:** Critiques cognitive load, friction, mental models, and flow efficiency.
+    - **Copy Specialist:** Critiques clarity, tone, brevity, calls-to-action, and grammar.
 6. **Reasoning Separation:** The system must separate the LLM's internal reasoning tokens from the final critique delivered to the user.
 7. **Camera Removal:** The existing webcam capture and streaming logic must be removed from the UI and backend.
 

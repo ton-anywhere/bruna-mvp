@@ -13,113 +13,45 @@ export default class extends Controller {
         console.log("Subscribed to VisionChannel")
       },
       received: (data) => {
-        this.handleResponse(data)
+        if (data.status === 'acknowledged') {
+          console.log("Server acknowledged image receipt");
+          // Optional: update UI to "Analysis in progress..."
+        } else {
+          this.handleResponse(data)
+        }
       }
     })
   }
 
   handleResponse(data) {
-    const reasoningEl = document.getElementById("vision-reasoning")
-    const answerEl = document.getElementById("vision-answer")
+    const { agent_id, content } = data;
 
-    if (reasoningEl && data.reasoning) {
-      reasoningEl.textContent = data.reasoning
-      reasoningEl.classList.remove("hidden")
-    }
+    if (!agent_id || !content) return;
 
-    if (data.answer) {
-      const parsed = this.parseAuditResponse(data.answer)
-      this.updateAuditUI(parsed)
+    const card = document.getElementById(`card-${agent_id}`);
+    if (card) {
+      const loader = card.querySelector(".loader");
+      const result = card.querySelector(".result");
+
+      if (loader) loader.classList.add("hidden");
       
-      if (answerEl) {
-        answerEl.classList.add("hidden")
-      }
-    }
-
-    this.hideLoadingState()
-  }
-
-  parseAuditResponse(text) {
-    if (!text) return { summary: "", accessibility: "", hierarchy: "", friction: "" };
-
-    const result = {
-      summary: "",
-      accessibility: "",
-      hierarchy: "",
-      friction: ""
-    };
-
-    const sections = text.split(/###\s+(Accessibility|Visual Hierarchy|UX Friction)/i);
-    
-    result.summary = sections[0]?.trim() || "";
-
-    for (let i = 1; i < sections.length; i += 2) {
-      const header = sections[i].toLowerCase();
-      const content = sections[i + 1]?.trim() || "";
-
-      if (header.includes("accessibility")) {
-        result.accessibility = content;
-      } else if (header.includes("visual hierarchy")) {
-        result.hierarchy = content;
-      } else if (header.includes("ux friction")) {
-        result.friction = content;
-      }
-    }
-
-    return result;
-  }
-
-  updateAuditUI(parsed) {
-    this.auditResultsContainerTarget.classList.remove("hidden")
-    
-    const mapping = [
-      { key: 'summary', target: 'summaryResult' },
-      { key: 'accessibility', target: 'accessibilityResult' },
-      { key: 'hierarchy', target: 'hierarchyResult' },
-      { key: 'friction', target: 'frictionResult' }
-    ]
-
-    let hasCategories = false
-
-    mapping.forEach(({ key, target }) => {
-      const content = parsed[key]
-      const targetEl = this[target + "Target"]
-      
-      if (targetEl) {
-        const textContainer = targetEl.querySelector('div')
-        if (textContainer) {
-          // Use marked for markdown rendering if available, otherwise fallback to textContent
-          if (window.marked && content) {
-            textContainer.innerHTML = window.marked.parse(content)
-          } else {
-            textContainer.textContent = content
-          }
-        }
-        
-        if (content && key !== 'summary') {
-          hasCategories = true
-          targetEl.classList.remove("hidden")
-        } else if (key !== 'summary') {
-          targetEl.classList.add("hidden")
-        }
-      }
-    })
-
-    // Summary-only fallback
-    const summaryEl = this.summaryResultTarget
-    if (summaryEl && !hasCategories) {
-      const textContainer = summaryEl.querySelector('div')
-      if (textContainer) {
-        const fallbackMsg = "\n\n*No category-specific issues found.*"
-        const currentContent = parsed.summary || ""
+      if (result) {
+        // Use marked for markdown rendering if available
         if (window.marked) {
-          textContainer.innerHTML = window.marked.parse(currentContent + fallbackMsg)
+          result.innerHTML = window.marked.parse(content);
         } else {
-          textContainer.textContent = currentContent + "\n\nNo category-specific issues found."
+          result.textContent = content;
         }
+        result.classList.remove("hidden");
+        // Simple pop-in animation via CSS or JS logic
+        result.classList.add("animate-in", "fade-in", "slide-in-from-bottom-2", "duration-500");
       }
     }
+
+    this.hideLoadingState();
   }
+
+  // Removed parseAuditResponse and updateAuditUI as they were for the single-block response
 
 
   selectImage(event) {
@@ -159,17 +91,93 @@ export default class extends Controller {
 
     this.showPreview(file)
     this.showLoadingState()
+    this.resetExpertCards()
 
     try {
-      const base64String = await this.fileToBase64(file)
+      const processedBlob = await this.resizeImage(file)
+      const base64String = await this.blobToBase64(processedBlob)
+
+      const payloadSizeKB = Math.round(base64String.length / 1024);
+      console.log(`VisionController: Sending image to ActionCable. Size: ${payloadSizeKB}KB`, {
+        length: base64String.length,
+        filename: file.name
+      });
+
+      if (!this.visionSubscription) {
+        console.error("VisionController: No active ActionCable subscription!");
+        throw new Error("WebSocket not connected");
+      }
+
       this.visionSubscription.send({ 
         image: base64String, 
         filename: file.name 
       })
     } catch (error) {
+
       console.error("Error processing image:", error)
       this.hideLoadingState()
     }
+  }
+
+  resetExpertCards() {
+    const cards = document.querySelectorAll(".expert-card");
+    cards.forEach(card => {
+      const loader = card.querySelector(".loader");
+      const result = card.querySelector(".result");
+
+      if (loader) {
+        loader.classList.remove("hidden");
+        const statusText = loader.querySelector("span");
+        if (statusText) statusText.textContent = "Analyzing...";
+      }
+      if (result) {
+        result.classList.add("hidden");
+        result.innerHTML = "";
+      }
+    });
+  }
+
+  async resizeImage(file) {
+    const MAX_WIDTH = 800
+    const MAX_HEIGHT = 800
+    const QUALITY = 0.7
+
+    return new Promise((resolve, reject) => {
+      const img = new Image()
+      img.src = URL.createObjectURL(file)
+
+      img.onload = () => {
+        URL.revokeObjectURL(img.src)
+
+        let width = img.width
+        let height = img.height
+
+        if (width > MAX_WIDTH || height > MAX_HEIGHT) {
+          if (width > height) {
+            height = Math.round((height * MAX_WIDTH) / width)
+            width = MAX_WIDTH
+          } else {
+            width = Math.round((width * MAX_HEIGHT) / height)
+            height = MAX_HEIGHT
+          }
+        }
+
+        const canvas = document.createElement("canvas")
+        canvas.width = width
+        canvas.height = height
+
+        const ctx = canvas.getContext("2d")
+        ctx.drawImage(img, 0, 0, width, height)
+
+        canvas.toBlob(
+          (blob) => resolve(blob),
+          "image/jpeg",
+          QUALITY
+        )
+      }
+
+      img.onerror = (error) => reject(error)
+    })
   }
 
   showPreview(file) {
@@ -196,14 +204,15 @@ export default class extends Controller {
     }
   }
 
-  fileToBase64(file) {
+  async blobToBase64(blob) {
     return new Promise((resolve, reject) => {
       const reader = new FileReader()
-      reader.readAsDataURL(file)
-      reader.onload = () => resolve(reader.result)
-      reader.onerror = (error) => reject(error)
+      reader.onloadend = () => resolve(reader.result)
+      reader.onerror = reject
+      reader.readAsDataURL(blob)
     })
   }
+
 
   resetImage(event) {
     event.preventDefault()
@@ -219,19 +228,25 @@ export default class extends Controller {
     this.dropzoneTarget.classList.remove("hidden")
     this.previewContainerTarget.classList.add("hidden")
 
-    // Clear AI analysis results
-    this.auditResultsContainerTarget.classList.add("hidden")
-    
-    const reasoningEl = document.getElementById("vision-reasoning")
-    if (reasoningEl) {
-      reasoningEl.textContent = ""
-      reasoningEl.classList.add("hidden")
-    }
+    this.resetExpertCardsToDefault();
+  }
 
-    const answerEl = document.getElementById("vision-answer")
-    if (answerEl) {
-      answerEl.classList.add("hidden")
-    }
+  resetExpertCardsToDefault() {
+    const cards = document.querySelectorAll(".expert-card");
+    cards.forEach(card => {
+      const loader = card.querySelector(".loader");
+      const result = card.querySelector(".result");
+
+      if (loader) {
+        loader.classList.remove("hidden");
+        const statusText = loader.querySelector("span");
+        if (statusText) statusText.textContent = "Waiting for upload...";
+      }
+      if (result) {
+        result.classList.add("hidden");
+        result.innerHTML = "";
+      }
+    });
   }
 
 }
