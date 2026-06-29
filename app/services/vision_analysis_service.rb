@@ -32,7 +32,7 @@ class VisionAnalysisService
                 ]
               }
             ],
-            max_tokens: 600,
+            max_tokens: 500,
             stream: true
           ) do |chunk|
             # The SDK yields a ResponseWrapper. We need to extract the content delta.

@@ -25,16 +25,20 @@ export default class extends Controller {
 
   handleResponse(data) {
     const { agent_id, content, status } = data;
-
+ 
     if (!agent_id) return;
-
+ 
     const card = document.getElementById(`card-${agent_id}`);
     if (!card) return;
-
+ 
+    // Trigger Expansion
+    this.expandCard(card);
+ 
     const loader = card.querySelector(".loader");
     const result = card.querySelector(".result");
-
+ 
     // 1. Handle streaming chunks
+
     if (status === 'streaming' && content) {
       if (!this.agentBuffers[agent_id]) {
         this.agentBuffers[agent_id] = "";
@@ -257,9 +261,10 @@ export default class extends Controller {
   resetExpertCardsToDefault() {
     const cards = document.querySelectorAll(".expert-card");
     cards.forEach(card => {
+      card.classList.remove("is-expanded");
       const loader = card.querySelector(".loader");
       const result = card.querySelector(".result");
-
+ 
       if (loader) {
         loader.classList.remove("hidden");
         const statusText = loader.querySelector("span");
@@ -271,5 +276,11 @@ export default class extends Controller {
       }
     });
   }
+
+  expandCard(card) {
+    if (card.classList.contains("is-expanded")) return;
+    card.classList.add("is-expanded");
+  }
+
 
 }
