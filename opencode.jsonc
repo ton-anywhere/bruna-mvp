@@ -1,0 +1,19 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "mcp": {
+    "playwright": {
+      "type": "local",
+      "command": [
+        "npx",
+        "@playwright/mcp@latest"
+      ],
+      "enabled": true
+    },
+    "tailwindcss-server": {
+      "type": "local",
+      "command": ["node", ".codex/tailwindcss-mcp-wrapper.mjs"],
+      "enabled": true
+    },
+  }
+}
+

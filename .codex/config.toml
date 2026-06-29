@@ -1,0 +1,22 @@
+[mcp_servers.astro-docs]
+command = "npx"
+args = ["-y", "mcp-remote", "https://mcp.docs.astro.build/mcp"]
+
+[mcp_servers.astro-docs.tools.search_astro_docs]
+approval_mode = "approve"
+
+[mcp_servers.tailwindcss-server]
+command = "node"
+args = [".codex/tailwindcss-mcp-wrapper.mjs"]
+
+[mcp_servers.tailwindcss-server.tools.get_tailwind_utilities]
+approval_mode = "approve"
+
+[mcp_servers.tailwindcss-server.tools.get_tailwind_colors]
+approval_mode = "approve"
+
+[mcp_servers.tailwindcss-server.tools.get_tailwind_config_guide]
+approval_mode = "approve"
+
+[mcp_servers.tailwindcss-server.tools.search_tailwind_docs]
+approval_mode = "approve"

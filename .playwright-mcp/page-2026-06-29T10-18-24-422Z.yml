@@ -1,0 +1,52 @@
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - button "Copy as text" [ref=e3]
+    - heading "NameError in Home#index" [level=1] [ref=e4]
+  - main [ref=e5]:
+    - paragraph [ref=e6]: "Showing /home/airtonp/code/ton-anywhere/hackaton-gemma-cerebras/web-boilerplate/app/views/layouts/application.html.erb where line #24 raised:"
+    - code [ref=e8]: "undefined local variable or method 'javascript_importmap_tags' for an instance of #<Class:0x000076f1164bab58>"
+    - generic [ref=e9]:
+      - generic [ref=e10]:
+        - text: Extracted source (around line
+        - strong [ref=e11]: "#23"
+        - text: "):"
+      - table [ref=e13]:
+        - rowgroup [ref=e14]:
+          - row "21 22 23 24 25 26 <%# Includes all stylesheet files in app/assets/stylesheets %> <%= stylesheet_link_tag :app %> <%= javascript_importmap_tags %> </head> <body>" [ref=e15]:
+            - cell "21 22 23 24 25 26" [ref=e16]:
+              - generic [ref=e17]: 21 22 23 24 25 26
+            - cell "<%# Includes all stylesheet files in app/assets/stylesheets %> <%= stylesheet_link_tag :app %> <%= javascript_importmap_tags %> </head> <body>" [ref=e18]:
+              - generic [ref=e19]:
+                - generic [ref=e20]: <%# Includes all stylesheet files in app/assets/stylesheets %>
+                - generic [ref=e21]: <%= stylesheet_link_tag :app %>
+                - generic [ref=e22]:
+                  - text: <%=
+                  - generic [ref=e23]: javascript_importmap_tags
+                  - text: "%>"
+                - generic [ref=e24]: </head>
+                - generic [ref=e26]: <body>
+    - paragraph
+    - paragraph [ref=e27]:
+      - code [ref=e28]: "Rails.root: /home/airtonp/code/ton-anywhere/hackaton-gemma-cerebras/web-boilerplate"
+    - generic [ref=e29]:
+      - link "Application Trace" [ref=e30] [cursor=pointer]:
+        - /url: "#"
+      - text: "|"
+      - link "Framework Trace" [ref=e31] [cursor=pointer]:
+        - /url: "#"
+      - text: "|"
+      - link "Full Trace" [ref=e32] [cursor=pointer]:
+        - /url: "#"
+      - code [ref=e34]:
+        - link "/home/airtonp/code/ton-anywhere/hackaton-gemma-cerebras/web-boilerplate/app/views/layouts/application.html.erb:24:in '_app_views_layouts_application_html_erb___702573511497756073_6232'" [ref=e36] [cursor=pointer]:
+          - /url: "#"
+    - heading "Request" [level=2] [ref=e37]
+    - paragraph [ref=e38]: "Parameters:"
+    - generic [ref=e39]: None
+    - link "Toggle session dump" [ref=e42] [cursor=pointer]:
+      - /url: "#"
+    - link "Toggle env dump" [ref=e45] [cursor=pointer]:
+      - /url: "#"
+    - heading "Response" [level=2] [ref=e46]
+    - paragraph [ref=e47]: "Headers:"
+    - generic [ref=e48]: None

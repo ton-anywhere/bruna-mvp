@@ -1,0 +1,7 @@
+- generic [ref=e2]:
+  - generic [ref=e3]:
+    - heading "Vision Feed" [level=2] [ref=e4]
+    - button "Capture Frame" [ref=e7]
+  - generic [ref=e9]:
+    - heading "AI Analysis" [level=2] [ref=e10]
+    - generic [ref=e11]: Capture a frame to see the AI response here...
