@@ -20,7 +20,8 @@ class VisionAnalysisService
         begin
           client = Cerebras::Client.new
 
-          response = client.chat.completions.create(
+          # We use streaming to provide a better UX
+          client.chat.completions.create(
             model: 'gemma-4-31b',
             messages: [
               {
@@ -31,15 +32,25 @@ class VisionAnalysisService
                 ]
               }
             ],
-            max_tokens: 1000
-          )
+            max_tokens: 600,
+            stream: true
+          ) do |chunk|
+            # The SDK yields a ResponseWrapper. We need to extract the content delta.
+            # Based on standard LLM stream responses, the content is in choices[0].delta.content
+            delta_content = extract_delta(chunk)
 
-          # Extract content (scrubbing reasoning)
-          res_content = extract_content(response)
+            if delta_content.present?
+              ActionCable.server.broadcast('vision_channel', {
+                agent_id: agent_id,
+                content: delta_content,
+                status: 'streaming'
+              })
+            end
+          end
 
+          # Signal that this agent has finished
           ActionCable.server.broadcast('vision_channel', {
             agent_id: agent_id,
-            content: res_content,
             status: 'success'
           })
         rescue StandardError => e
@@ -53,6 +64,22 @@ class VisionAnalysisService
   end
 
   private
+
+  def self.extract_delta(chunk)
+    # The chunk is a Cerebras::ResponseWrapper.
+    # It uses method_missing to allow access like chunk.choices.first.delta.content
+    begin
+      choices = chunk.choices
+      return '' unless choices && choices.any?
+
+      first_choice = choices.first
+      delta = first_choice.delta
+      delta.content || ''
+    rescue StandardError => e
+      Rails.logger.debug "[VisionAnalysisService] extract_delta parsing: #{e.message}"
+      ''
+    end
+  end
 
   def self.extract_content(response)
     choices = response.respond_to?(:choices) ? response.choices : []

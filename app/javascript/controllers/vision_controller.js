@@ -8,6 +8,7 @@ export default class extends Controller {
   ]
 
   connect() {
+    this.agentBuffers = {}; // Keep track of accumulated text per agent
     this.visionSubscription = consumer.subscriptions.create("VisionChannel", {
       connected() {
         console.log("Subscribed to VisionChannel")
@@ -15,7 +16,6 @@ export default class extends Controller {
       received: (data) => {
         if (data.status === 'acknowledged') {
           console.log("Server acknowledged image receipt");
-          // Optional: update UI to "Analysis in progress..."
         } else {
           this.handleResponse(data)
         }
@@ -24,27 +24,47 @@ export default class extends Controller {
   }
 
   handleResponse(data) {
-    const { agent_id, content } = data;
+    const { agent_id, content, status } = data;
 
-    if (!agent_id || !content) return;
+    if (!agent_id) return;
 
     const card = document.getElementById(`card-${agent_id}`);
-    if (card) {
-      const loader = card.querySelector(".loader");
-      const result = card.querySelector(".result");
+    if (!card) return;
+
+    const loader = card.querySelector(".loader");
+    const result = card.querySelector(".result");
+
+    // 1. Handle streaming chunks
+    if (status === 'streaming' && content) {
+      if (!this.agentBuffers[agent_id]) {
+        this.agentBuffers[agent_id] = "";
+      }
+      
+      this.agentBuffers[agent_id] += content;
 
       if (loader) loader.classList.add("hidden");
-      
       if (result) {
-        // Use marked for markdown rendering if available
-        if (window.marked) {
-          result.innerHTML = window.marked.parse(content);
-        } else {
-          result.textContent = content;
-        }
         result.classList.remove("hidden");
-        // Simple pop-in animation via CSS or JS logic
+        if (window.marked) {
+          result.innerHTML = window.marked.parse(this.agentBuffers[agent_id]);
+        } else {
+          result.textContent = this.agentBuffers[agent_id];
+        }
         result.classList.add("animate-in", "fade-in", "slide-in-from-bottom-2", "duration-500");
+      }
+    }
+    // 2. Handle final success (stop loader, final render)
+    else if (status === 'success') {
+      if (loader) loader.classList.add("hidden");
+      // Buffer is already rendered in the streaming block, but we ensure it's visible
+      if (result) result.classList.remove("hidden");
+    }
+    // 3. Handle errors
+    else if (status === 'error') {
+      if (loader) loader.classList.add("hidden");
+      if (result) {
+        result.classList.remove("hidden");
+        result.innerHTML = `<span class="text-red-500">${content || 'An error occurred'}</span>`;
       }
     }
 
@@ -122,6 +142,9 @@ export default class extends Controller {
   resetExpertCards() {
     const cards = document.querySelectorAll(".expert-card");
     cards.forEach(card => {
+      const agentId = card.id.replace('card-', '');
+      delete this.agentBuffers[agentId];
+
       const loader = card.querySelector(".loader");
       const result = card.querySelector(".result");
 
