@@ -218,5 +218,20 @@ export default class extends Controller {
     
     this.dropzoneTarget.classList.remove("hidden")
     this.previewContainerTarget.classList.add("hidden")
+
+    // Clear AI analysis results
+    this.auditResultsContainerTarget.classList.add("hidden")
+    
+    const reasoningEl = document.getElementById("vision-reasoning")
+    if (reasoningEl) {
+      reasoningEl.textContent = ""
+      reasoningEl.classList.add("hidden")
+    }
+
+    const answerEl = document.getElementById("vision-answer")
+    if (answerEl) {
+      answerEl.classList.add("hidden")
+    }
   }
+
 }
