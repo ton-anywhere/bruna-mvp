@@ -9,23 +9,23 @@ Update the file after completing each sub-task, not just after completing an ent
 - [ ] 0.0 Create feature branch
   - [ ] 0.1 Create and checkout a new branch for this feature (e.g., `git checkout -b feature/ui-auditor`)
 
-- [ ] 1.0 Infrastructure & Cleanup
-  - [ ] 1.1 Remove webcam initialization logic from `app/javascript/controllers/vision_controller.js` (remove `initCamera` and `flashCapture`).
-  - [ ] 1.2 Remove legacy camera HTML elements from `app/views/home/index.html.erb` (remove `<video>`, legacy `canvas`, and "Capture Frame" button).
-  - [ ] 1.3 Clean up `vision_controller.js` targets to remove `stream` and `canvas`.
-  - [ ] 1.4 Verify the page loads without console errors related to missing camera permissions or elements.
+- [x] 1.0 Infrastructure & Cleanup
+  - [x] 1.1 Remove webcam initialization logic from `app/javascript/controllers/vision_controller.js` (remove `initCamera` and `flashCapture`).
+  - [x] 1.2 Remove legacy camera HTML elements from `app/views/home/index.html.erb` (remove `<video>`, legacy `canvas`, and "Capture Frame" button).
+  - [x] 1.3 Clean up `vision_controller.js` targets to remove `stream` and `canvas`.
+  - [x] 1.4 Verify the page loads without console errors related to missing camera permissions or elements.
 
-- [ ] 2.0 Image Upload Interface
-  - [ ] 2.1 Implement a drag-and-drop zone in `app/views/home/index.html.erb` using Tailwind CSS for a clean, centered upload area.
-  - [ ] 2.2 Add a hidden file input and a "Select Image" button to trigger it.
-  - [ ] 2.3 Implement `vision_controller.js` event listeners for `dragover`, `dragleave`, and `drop` to provide visual feedback (e.g., border color change).
-  - [ ] 2.4 Implement a "preview" mechanism to show the uploaded image before sending it to the AI.
+- [x] 2.0 Image Upload Interface
+  - [x] 2.1 Implement a drag-and-drop zone in `app/views/home/index.html.erb` using Tailwind CSS for a clean, centered upload area.
+  - [x] 2.2 Add a hidden file input and a "Select Image" button to trigger it.
+  - [x] 2.3 Implement `vision_controller.js` event listeners for `dragover`, `dragleave`, and `drop` to provide visual feedback (e.g., border color change).
+  - [x] 2.4 Implement a "preview" mechanism to show the uploaded image before sending it to the AI.
 
-- [ ] 3.0 Image Processing Pipeline
-  - [ ] 3.1 Create a helper method in `vision_controller.js` to convert the uploaded `File` object to a Base64 string using `FileReader`.
-  - [ ] 3.2 Wire the conversion logic to the `drop` and `change` events.
-  - [ ] 3.3 Modify the `visionSubscription.send` call to transmit the Base64 string and the filename.
-  - [ ] 3.4 Implement "Analyzing..." UI state: disable upload zone and show a loading spinner/message while waiting for the WebSocket response.
+- [x] 3.0 Image Processing Pipeline
+  - [x] 3.1 Create a helper method in `vision_controller.js` to convert the uploaded `File` object to a Base64 string using `FileReader`.
+  - [x] 3.2 Wire the conversion logic to the `drop` and `change` events.
+  - [x] 3.3 Modify the `visionSubscription.send` call to transmit the Base64 string and the filename.
+  - [x] 3.4 Implement "Analyzing..." UI state: disable upload zone and show a loading spinner/message while waiting for the WebSocket response.
 
 - [ ] 4.0 Specialized Audit Service (deliverable: App accepts an image and returns a raw AI audit response)
   - [ ] 4.1 Update `app/services/vision_analysis_service.rb` system prompt: Instruct the model to act as a "ruthless but constructive senior design lead".

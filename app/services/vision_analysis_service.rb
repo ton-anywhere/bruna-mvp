@@ -4,10 +4,13 @@ class VisionAnalysisService
       return { reasoning: '', answer: 'Error: CEREBRAS_API_KEY is not set' }
     end
 
-    # Ensure we have a clean base64 string by removing any existing data URI prefix
-    # This prevents double-prefixing or malformed prefixes from the frontend
-    raw_base64 = base64_image.sub(/^data:image\/[a-z]+;base64,/, '')
-    image_url = "data:image/jpeg;base64,#{raw_base64}"
+    # Preserve the original Data URI prefix if present, as it contains the correct MIME type (png, jpeg, etc.)
+    # If no prefix is present, default to image/png.
+    image_url = if base64_image.start_with?('data:image/')
+                  base64_image
+                else
+                  "data:image/png;base64,#{base64_image}"
+                end
 
     client = Cerebras::Client.new
 
@@ -20,12 +23,30 @@ class VisionAnalysisService
         {
           role: 'user',
           content: [
-            { type: 'text', text: 'What is in this image? Please describe it concisely.' },
+            { 
+              type: 'text', 
+              text: <<~PROMPT
+                Act as a ruthless but constructive senior design lead. Your goal is to provide a professional UI audit of the provided screenshot. 
+
+                Do not provide generic praise (e.g., do not say "the design is clean" or "looks good"). Instead, provide a standards-based critique focusing on efficiency, accessibility, and professional polish.
+
+                The output must be a critique, not a description. Structure your response using the following Markdown headers:
+
+                ### Accessibility
+                Focus on WCAG compliance, color contrast, legible typography, and touch targets.
+
+                ### Visual Hierarchy
+                Focus on alignment, focal points, spacing, and the use of typography to guide the eye.
+
+                ### UX Friction
+                Focus on cognitive load, confusing interaction patterns, and potential user pain points.
+              PROMPT
+            },
             { type: 'image_url', image_url: { url: image_url } }
           ]
         }
       ],
-      max_tokens: 500
+       max_tokens: 1000
     )
     Rails.logger.debug "[VisionAnalysisService] FULL-RESPONSE-DUMP: #{response.inspect}"
 

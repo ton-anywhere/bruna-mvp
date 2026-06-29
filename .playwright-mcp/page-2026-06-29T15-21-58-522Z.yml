@@ -1,0 +1,10 @@
+- main [ref=e2]:
+  - generic [ref=e3]:
+    - generic [ref=e5]:
+      - heading "UI Auditor" [level=2] [ref=e6]
+      - generic [ref=e18]:
+        - img "Preview" [ref=e20]
+        - paragraph [ref=e23]: Analyzing screenshot...
+    - generic [ref=e15]:
+      - heading "AI Analysis" [level=2] [ref=e16]
+      - generic [ref=e17]: Upload a screenshot to see the AI response here...

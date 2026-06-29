@@ -8,12 +8,12 @@ RSpec.describe VisionChannel, type: :controller do
   describe '#receive' do
     it 'transmits the analysis result' do
       expect(channel).to receive(:transmit).with(hash_including(:reasoning, :answer))
-      channel.received({ 'image' => 'a' * 123 })
+      channel.receive({ 'image' => 'a' * 123 })
     end
 
     it 'handles missing image data gracefully' do
       expect(channel).not_to receive(:transmit)
-      channel.received({ 'image' => nil })
+      channel.receive({ 'image' => nil })
     end
   end
 end
