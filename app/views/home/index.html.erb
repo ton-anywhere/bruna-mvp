@@ -1,27 +1,6 @@
 <div class="flex h-screen w-full bg-gray-100" data-controller="vision">
-  <!-- Left Side: Vision Stream -->
-  <div class="w-1/2 p-6 flex flex-col items-center justify-center border-r border-gray-300 bg-black text-white">
-    <h2 class="text-2xl font-bold mb-4">Vision Feed</h2>
-    
-    <div class="relative w-full max-w-md aspect-video bg-gray-800 rounded-lg overflow-hidden shadow-xl">
-      <video id="vision-stream" 
-             data-vision-target="stream"
-             autoplay 
-             playsinline 
-             class="w-full h-full object-cover"></video>
-    </div>
-
-    <button id="capture-button" data-action="click->vision#capture" 
-            class="mt-6 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-full transition-all transform active:scale-95 shadow-lg">
-      Capture Frame
-    </button>
-    
-    <!-- Hidden canvas for frame extraction -->
-    <canvas id="vision-canvas" data-vision-target="canvas" class="hidden"></canvas>
-  </div>
-
   <!-- Right Side: AI Response Placeholder -->
-  <div class="w-1/2 p-6 flex flex-col items-center justify-center bg-white">
+  <div class="w-full p-6 flex flex-col items-center justify-center bg-white">
     <h2 class="text-2xl font-bold mb-4 text-gray-800">AI Analysis</h2>
     <div id="vision-reasoning" class="w-full max-w-md mb-4 text-sm text-gray-500 italic text-center"></div>
     <div id="vision-answer" class="w-full max-w-md p-8 border-2 border-dashed border-gray-300 rounded-lg text-center text-xl font-bold text-indigo-600">

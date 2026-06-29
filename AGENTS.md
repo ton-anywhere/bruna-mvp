@@ -1,7 +1,7 @@
 # Agent Instructions & Contextual Anchor
 
 ## 🎯 Project Mission
-A minimalist Rails validation boilerplate designed to prove the end-to-end "Live Vision" loop: capturing webcam frames in the browser, transporting them via WebSockets, and processing them through a local Ruby SDK calling the Cerebras Gemma 4 multimodal model.
+A minimalist Rails validation boilerplate designed to prove the end-to-end "UI Auditor" loop: uploading UI screenshots in the browser, transporting them via WebSockets, and processing them through a local Ruby SDK calling the Cerebras Gemma 4 multimodal model to provide professional design critiques.
 
 ## 🏗️ Core Architectural Principles (Non-Negotiable)
 - **Extreme Minimalism:** Rails launched with `--minimal`. Only include dependencies explicitly required for the visual loop.
@@ -15,14 +15,14 @@ A minimalist Rails validation boilerplate designed to prove the end-to-end "Live
 
 ### Non-obvious decisions
 - **Stateless Loop:** The validator is designed for a "One Frame $\rightarrow$ One Response" flow. No database persistence is required for the MVP.
-- **Base64 Pipeline:** Images are captured as Base64 strings in the browser and passed directly through ActionCable to the SDK.
+- **Base64 Pipeline:** UI screenshots are uploaded as Base64 strings in the browser and passed directly through ActionCable to the SDK.
 - **Reasoning Parsing:** The response from `gemma-4-31b` contains reasoning content that must be separated from the final answer in the UI to avoid "thought" leakage into the answer box.
 
 ## 📚 Essential Documentation
 Before proposing code changes, consult:
-1. **[The Blueprint]** `docs/prd-live-vision-boilerplate.md`
-   - *Defines the functional requirements and the "Capture $\rightarrow$ Analyze $\rightarrow$ Display" loop.*
-2. **[The Task List]** `tasks/tasks-live-vision-boilerplate.md`
+1. **[The Blueprint]** `docs/prd-ui-auditor.md`
+   - *Defines the functional requirements and the "Upload $\rightarrow$ Analyze $\rightarrow$ Display" loop.*
+2. **[The Task List]** `tasks/tasks-ui-auditor.md`
    - *Tracks the current implementation phase and milestones.*
 
 ## 🔁 Development Loop (Mandatory)
