@@ -56,3 +56,10 @@ To ensure your `CEREBRAS_API_KEY` is configured correctly and the SDK is linked,
 - **Extreme Minimalism:** Only dependencies essential to the visual loop are included.
 - **Pinned SDK:** The `cerebras` gem is pinned to version `0.1.0` and fetched directly from its GitHub repository via Bundler.
 - **Designed for Reasoning Separation:** Architecture is ready to separate model reasoning from the final critique to ensure a clean user experience should the model provide reasoning tokens.
+
+## 🔗 Links & Submission
+
+- [Bruna UI announcement on X](https://x.com/ton_anywhere/status/2071643988721828352)
+- [Cerebras Ruby SDK](https://github.com/ton-anywhere/cerebras-cloud-sdk-ruby) (dependency developed during the same hackathon)
+- **Google Gemma-4 31B** was used to power and develop this project. [Model Page on Hugging Face](https://huggingface.co/google/gemma-4-31B)
+- **Cerebras x Google Gemma 4** [Hackaton page](https://luma.com/cerebras-piwl)
