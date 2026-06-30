@@ -18,10 +18,11 @@ Bruna UI provides instant, professional-grade UX/UI audits by analyzing screensh
   - **UX Psychologist:** Analyzes cognitive load and mental model friction.
   - **Copy Specialist:** Mercilessly edits for clarity, brevity, and conversion.
 - **Stateless Pipeline:** Designed for instant "One Frame -> One Response" flow with no database overhead.
+- **Extreme Minimalism:** Only dependencies essential to the visual loop are included.
 
 ## 🛠️ Tech Stack
 - **Backend:** Rails (Minimal mode)
-- **Frontend:** Hotwire (Turbo + Stimulus)
+- **Frontend:** Stimulus + Tailwind
 - **Transport:** ActionCable (WebSockets) for low-latency image transmission.
 - **AI Model:** `gemma-4-31b` via the local Cerebras Ruby SDK.
 - **Data Flow:** Base64 encoded image pipeline.
@@ -53,11 +54,6 @@ To ensure your `CEREBRAS_API_KEY` is configured correctly and the SDK is linked,
 
 - **Test Basic API Call:** `ruby spec/smoke/test_api_call.rb`
 - **Test Vision/Image Analysis:** `ruby spec/smoke/test_vision_sdk_call.rb`
-
-## 🏗️ Architecture Principles
-- **Extreme Minimalism:** Only dependencies essential to the visual loop are included.
-- **Pinned SDK:** The `cerebras` gem is pinned to version `0.1.0` and fetched directly from its GitHub repository via Bundler.
-- **Designed for Reasoning Separation:** Architecture is ready to separate model reasoning from the final critique to ensure a clean user experience should the model provide reasoning tokens.
 
 ## 🔗 Links & Submission
 
