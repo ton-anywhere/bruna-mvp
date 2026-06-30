@@ -4,6 +4,8 @@ A minimalist, high-performance design critique tool powered by **Gemma 4 on Cere
 
 Bruna UI provides instant, professional-grade UX/UI audits by analyzing screenshots and delivering actionable feedback via a panel of specialized AI agents—all with ultra-low latency.
 
+![Bruna UI demo](demo.gif)
+
 ## 🚀 Core Loop
 `Upload Screenshot` -> `WebSocket Transport` -> `Gemma 4 Analysis` -> `Categorized Critique`
 
