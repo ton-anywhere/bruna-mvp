@@ -56,6 +56,11 @@ Rails.application.configure do
   # Only use :id for inspections in production.
   config.active_record.attributes_for_inspect = [ :id ]
 
+  # ActionCable
+  # config/environments/production.rb
+  config.action_cable.url = 'wss://bruna-ui.onrender.com/cable'
+  config.action_cable.allowed_request_origins = [ 'https://bruna-ui.onrender.com' ]
+
   # Enable DNS rebinding protection and other `Host` header attacks.
   # config.hosts = [
   #   "example.com",     # Allow requests from example.com

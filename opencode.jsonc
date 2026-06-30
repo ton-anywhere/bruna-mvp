@@ -14,6 +14,14 @@
       "command": ["node", ".codex/tailwindcss-mcp-wrapper.mjs"],
       "enabled": true
     },
+    "render": {
+      "type": "remote",
+      "url": "https://mcp.render.com/mcp",
+      "enabled": true,
+      "headers": {
+        "Authorization": "Bearer {env:RENDER_API_KEY}"
+      }
+    },
   }
 }
 
