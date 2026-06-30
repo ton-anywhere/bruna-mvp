@@ -59,6 +59,7 @@ To ensure your `CEREBRAS_API_KEY` is configured correctly and the SDK is linked,
 
 ## 🔗 Links & Submission
 
+- **Live Demo:** [https://bruna-ui.onrender.com](https://bruna-ui.onrender.com)
 - [Bruna UI announcement on X](https://x.com/ton_anywhere/status/2071643988721828352)
 - [Cerebras Ruby SDK](https://github.com/ton-anywhere/cerebras-cloud-sdk-ruby) (dependency developed during the same hackathon)
 - **Google Gemma-4 31B** was used to power and develop this project. [Model Page on Hugging Face](https://huggingface.co/google/gemma-4-31B)
