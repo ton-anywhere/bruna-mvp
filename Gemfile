@@ -9,7 +9,7 @@ gem 'sqlite3', '>= 2.1'
 # Use the Puma web server [https://github.com/puma/puma]
 gem 'puma', '>= 5.0'
 # local cerebras sdk
-gem 'cerebras', path: '../ruby-sdk'
+gem 'cerebras', '0.1.0', github: 'ton-anywhere/cerebras-cloud-sdk-ruby'
 
 # Windows does not include zoneinfo files, so bundle the tzinfo-data gem
 gem 'tzinfo-data', platforms: %i[ windows jruby ]

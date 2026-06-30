@@ -32,12 +32,11 @@ Bruna UI provides instant, professional-grade UX/UI audits by analyzing screensh
 
 ### Installation
 1. Clone the repository.
-2. Ensure the `cerebras` Ruby SDK is available at `../ruby-sdk` (as defined in the Gemfile).
-3. Create a `.env` file in the root directory:
+2. Create a `.env` file in the root directory:
    ```env
    CEREBRAS_API_KEY=your_key_here
    ```
-4. Install dependencies:
+3. Install dependencies (Bundler will fetch the exact `cerebras` gem version `0.1.0` from GitHub):
    ```bash
    bundle install
    ```
@@ -47,7 +46,13 @@ Bruna UI provides instant, professional-grade UX/UI audits by analyzing screensh
 bin/dev
 ```
 
+### 🧪 Verification
+To ensure your `CEREBRAS_API_KEY` is configured correctly and the SDK is linked, run the smoke tests:
+
+- **Test Basic API Call:** `ruby spec/smoke/test_api_call.rb`
+- **Test Vision/Image Analysis:** `ruby spec/smoke/test_vision_sdk_call.rb`
+
 ## 🏗️ Architecture Principles
 - **Extreme Minimalism:** Only dependencies essential to the visual loop are included.
-- **Local-First SDK:** Utilizes a local path for the SDK to ensure rapid iteration.
-- **Reasoning Separation:** Explicitly separates model reasoning from the final critique to ensure a clean user experience.
+- **Pinned SDK:** The `cerebras` gem is pinned to version `0.1.0` and fetched directly from its GitHub repository via Bundler.
+- **Designed for Reasoning Separation:** Architecture is ready to separate model reasoning from the final critique to ensure a clean user experience should the model provide reasoning tokens.

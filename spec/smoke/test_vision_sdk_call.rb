@@ -1,7 +1,4 @@
-require 'base64'
-require 'dotenv/load'
-$LOAD_PATH.unshift File.expand_path('../../../ruby-sdk/lib', __dir__)
-require 'cerebras'
+require_relative '../../config/environment'
 
 # 1. Load image to base64
 image_path = './spec/smoke/test_image.jpg'

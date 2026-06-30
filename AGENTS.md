@@ -1,11 +1,11 @@
 # Agent Instructions & Contextual Anchor
 
 ## 🎯 Project Mission
-A minimalist Rails validation boilerplate designed to prove the end-to-end "UI Auditor" loop: uploading UI screenshots in the browser, transporting them via WebSockets, and processing them through a local Ruby SDK calling the Cerebras Gemma 4 multimodal model to provide professional design critiques.
+Bruna UI is a minimalist, high-performance design critique tool powered by Gemma 4 on Cerebras. It provides instant, professional-grade UX/UI audits by analyzing screenshots and delivering actionable feedback via a panel of specialized AI agents—all with ultra-low latency.
 
 ## 🏗️ Core Architectural Principles (Non-Negotiable)
 - **Extreme Minimalism:** Rails launched with `--minimal`. Only include dependencies explicitly required for the visual loop.
-- **Local-First SDK:** The `cerebras` gem is linked via local path (`path: '../ruby-sdk'`). Do not attempt to use a public gem version.
+- **Pinned SDK:** The `cerebras` gem is pinned to version `0.1.0` and fetched directly from its GitHub repository via Bundler (`github: 'ton-anywhere/cerebras-cloud-sdk-ruby'`). Do not attempt to use a public gem version.
 - **Low-Latency Transport:** Mandatory use of ActionCable (WebSockets) + Hotwire/Turbo. Standard HTTP POST requests for image transfer are forbidden.
 - **Cerebras-Specific Handling:** The API is not generically OpenAI-compatible. Reasoning tokens must be handled as distinct data from the final content.
 
@@ -14,7 +14,7 @@ A minimalist Rails validation boilerplate designed to prove the end-to-end "UI A
 **Rails Minimal Monolith** with a Hotwire frontend (Turbo + Stimulus) and an ActionCable backend.
 
 ### Non-obvious decisions
-- **Stateless Loop:** The validator is designed for a "One Frame $\rightarrow$ One Response" flow. No database persistence is required for the MVP.
+- **Stateless Loop:** Bruna UI is designed for a "One Frame -> One Response" flow. No database persistence is required for the MVP.
 - **Base64 Pipeline:** UI screenshots are uploaded as Base64 strings in the browser and passed directly through ActionCable to the SDK.
 - **Reasoning Parsing:** The response from `gemma-4-31b` contains reasoning content that must be separated from the final answer in the UI to avoid "thought" leakage into the answer box.
 
@@ -54,7 +54,7 @@ bin/dev                     # Start Rails server and ActionCable
 ```
 
 ### Notable Configurations
-- `Gemfile` — contains the local path link to `../ruby-sdk`.
+- `Gemfile` — pins the SDK to `0.1.0` via `github: 'ton-anywhere/cerebras-cloud-sdk-ruby'`.
 - `.env` — must contain the `CEREBRAS_API_KEY`.
 
 ### Standards
